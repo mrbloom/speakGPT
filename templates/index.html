@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat with GPT</title>
+</head>
+<body>
+    <div>
+        <button onclick="startListening()">Start Listening</button>
+        <button id="speakButton">Speak</button>
+
+        <div id="chatBox"></div>
+    </div>
+    <script>
+        speakMessage("Тест речи");
+        function startListening() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'ru-RU';
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const userMessage = event.results[0][0].transcript;
+                document.getElementById('chatBox').innerHTML += 'You: ' + userMessage + '<br>';
+                sendMessage(userMessage);
+            }
+        }
+
+        function sendMessage(userMessage) {
+            fetch('/ask', {
+                method: 'POST',
+                body: new URLSearchParams({ 'user_message': userMessage }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const message = data.message;
+                document.getElementById('chatBox').innerHTML += 'GPT: ' + message + '<br>';
+                speakMessage(message);
+            });
+        }
+
+        function speakMessage(message) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.lang = 'ru-RU';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        var func=undefined;
+
+        function sleep(ms) {
+            // add ms millisecond timeout before promise resolution
+            return new Promise(resolve => setTimeout(resolve, ms))
+        }
+
+
+        document.getElementById('speakButton').addEventListener('click', async function() {
+            let utterance = new SpeechSynthesisUtterance('Шо я буду делать!');
+            utterance.lang = 'ru-RU';
+            speechSynthesis.speak(utterance);
+
+            function spp(){
+                //document.getElementById('speakButton').click();
+                console.log('click');
+            }
+            func = spp
+
+            utterance = new SpeechSynthesisUtterance('Шо я буду делать 66!');
+            utterance.lang = 'ru-RU';
+            speechSynthesis.speak(utterance);
+
+            utterance = new SpeechSynthesisUtterance('Шо я буду делать 77!');
+            utterance.lang = 'ru-RU';
+            speechSynthesis.speak(utterance);
+
+            await sleep(1000000);
+
+        });
+
+
+
+    </script>
+</body>
+</html>
